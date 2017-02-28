@@ -28,6 +28,8 @@ drop table VGWRITE;
 drop table VGXFER;
 drop table TOP;
 drop table UARG;
+drop table PAGE;
+drop table PAGING;
 
 
 create table CPU_ALL (
@@ -299,5 +301,26 @@ create table UARG (
 	THCOUNT		integer,	
 	username	char(8),
 	GROUPname	char(8));
-	
+
+create table PAGE (
+	Serial          char(16),
+        host            char(16),
+        time            timestamp,
+	faults		real,
+	pgin		real,
+	pgout		real,
+	pgsin		real,
+	pgsout		real,
+	reclaims 	real,
+	scans		real,
+	cycles		real);
+
+
+create table PAGING (
+        Serial          char(16),
+        host            char(16),
+        time            timestamp,
+        label           char(32),
+        value           real);
+
 
