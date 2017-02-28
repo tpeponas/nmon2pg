@@ -95,13 +95,12 @@ foreach $nmon_file (@ARGV) {
 				if ($cols[1] =~ /SerialNumber/) { $serial=$cols[2]; }
 				if ($cols[1] =~ /host/) 	{ $hostname=lc($cols[2]); }
 			}
-			case (/^DISKBUSY|^DISKREAD|^DISKREADSERV|^DISKRIO|^DISKRXFER|^DISKSERV|^DISKWAIT|^DISKWIO|^DISKWRITE|^DISKWRITESERV|^DISKXFER|^DISKAVGRIO|^DISKAVGWIO|^DISKBSIZE|^VG.+/) {
+			case (/^DISK.+|^VG.+/) {
 				if ( $cols[1] =~ /^T[0-9]+/) {
 					# insert values
                                         $n=@{$label{$cols[0]}};
                                         for($i=0;$i<$n;$i++){
 						push(@{$copydata{$cols[0]}},"$serial,$hostname,$ZZZZ{$cols[1]},$label{$cols[0]}[$i],$cols[$i+2]");
-	                                   #     print "Insert into ".$cols[0]." values (".$serial.",".$hostname.",to_timestamp(".$ZZZZ{$cols[1]}."),".$label{$cols[0]}[$i].",".$cols[$i+2].");\n";
 					}
 				} else {
 					# initialise tableau id 
@@ -121,10 +120,7 @@ case (/JFSINODE/) {}
 				$n=@cols;
 				if ( $cols[1] =~ /^T[0-9]+/) {
 					$values=join(",",@cols[2..$n-1]);
-#	                                print "Insert into ".$cols[0]." values (".$serial.",".$hostname.",to_timestamp(".$ZZZZ{$cols[1]}."),".$values.");\n";
 					push(@{$copydata{$cols[0]}},"$serial,$hostname,$ZZZZ{$cols[1]},$values");
-					#my $stmt = qq(Insert into $cols[0] values ($serial,$hostname,to_timestamp($ZZZZ{$cols[1]}),$values));
-					#my $rv = $dbh->do($stmt) or die $DBI::errstr;
 				} else  {
 					$copydata{$cols[0]}=[];
 				}
@@ -148,12 +144,8 @@ case (/JFSINODE/) {}
 					$cols[3] =~ s/-/0/g;
 					$cols[5] =~ s/\ /0/g;
 					$command=join(",",@cols[8..$n-1]);
-					#print $cols[$n-1]."\n";
                                         $values=join(",",@cols[2..7]);
-#                                       print "Insert into ".$cols[0]." values (".$serial.",".$hostname.",to_timestamp(".$ZZZZ{$cols[1]}."),".$values.",".$command.");\n";
                                         push(@{$copydata{$cols[0]}},"$serial,$hostname,$ZZZZ{$cols[1]},$values");
-                                        #my $stmt = qq(Insert into $cols[0] values ($serial,$hostname,to_timestamp($ZZZZ{$cols[1]}),$values));
-                                        #my $rv = $dbh->do($stmt) or die $DBI::errstr;
                                 } else  {
                                         $copydata{$cols[0]}=[];
                                 }
@@ -164,9 +156,6 @@ case (/JFSINODE/) {}
 					$n=@{$class{$cols[0]}};
                                         for($i=0;$i<$n;$i++){
 						push(@{$copydata{$cols[0]}},"$serial,$hostname,$ZZZZ{$cols[1]},$class{$cols[0]}[$i],$cols[$i+2]");
-#					my $stmt = qq(Insert into $cols[0] values ($serial,$hostname,to_timestamp($ZZZZ{$cols[1]}),$class{$cols[0]}[$i],$cols[$i+2]));
-#					my $rv = $dbh->do($stmt) or die $DBI::errstr;
-		#			print "Insert into ".$cols[0]." values (".$serial.",".$hostname.",to_timestamp(".$ZZZZ{$cols[1]}."),".$class{$cols[0]}[$i].",".$cols[$i+2].");\n";
 					}
                                 } else {
 					$copydata{$cols[0]}=[];
