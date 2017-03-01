@@ -333,7 +333,7 @@ create table NET (
         time            timestamp,
         label           char(32),
 	read		real,
-	write		real));
+	write		real);
 
 create table NETPACKET (
 	Serial          char(16),
@@ -341,7 +341,7 @@ create table NETPACKET (
         time            timestamp,
         label           char(32),
         read            real,
-        write           real));
+        write           real);
 
 create table NETSIZE (
         Serial          char(16),
@@ -349,7 +349,7 @@ create table NETSIZE (
         time            timestamp,
         label           char(32),
         readsize        real,
-        writesize       real));
+        writesize       real);
 
 
 create table NETERROR (
@@ -359,5 +359,5 @@ create table NETERROR (
         label           char(32),
 	ierrs		real,
 	oerrs		real,	
-	collisions	real))
+	collisions	real);
 	

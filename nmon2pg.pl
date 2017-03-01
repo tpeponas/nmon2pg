@@ -67,6 +67,7 @@ foreach $nmon_file (@ARGV) {
 	my %ZZZZ;
 	my %copydata;
 	my $values;
+	my @interfaces;
 	
 	$aix_version="unknow";
 	open(NMON,$nmon_file) or die ("Pas de fichier nmon en entrée");
@@ -125,7 +126,39 @@ case (/JFSINODE/) {}
 					$copydata{$cols[0]}=[];
 				}
 			} 
-#case (/NET|NETERROR|NETPACKET|NETSIZE/) {} 
+			case ("NET") {
+				if ( $cols[1] =~ /^T[0-9]+/) {
+					$n=@interfaces;
+					for($i=0;$i<$n;$i++) {
+						push(@{$copydata{$cols[0]}},"$serial,$hostname,$ZZZZ{$cols[1]},$interfaces[$i],$cols[$i+2],$cols[$i+$n+2]");
+					}
+                                } else  {
+					$n=@cols;
+					print "$n\n";
+					# Inititalisation des nom interface
+					for($i=2;$i<($n-2)/2+2;$i++) {
+						$cols[$i] =~ s/-read.*//;
+						push(@interfaces,$cols[$i]);
+					}
+                                }
+
+			} 
+			case (/NETSIZE|NETPACKET/) {
+				if ( $cols[1] =~ /^T[0-9]+/) {
+					$n=@interfaces;
+                                        for($i=0;$i<$n;$i++) {
+                                                push(@{$copydata{$cols[0]}},"$serial,$hostname,$ZZZZ{$cols[1]},$interfaces[$i],$cols[$i+2],$cols[$i+$n+2]");
+                                        }
+                                }
+			} 
+			case ("NETERROR") {	
+				if ( $cols[1] =~ /^T[0-9]+/) {
+					$n=@interfaces;
+                                        for($i=0;$i<$n;$i++) {
+                                                push(@{$copydata{$cols[0]}},"$serial,$hostname,$ZZZZ{$cols[1]},$interfaces[$i],$cols[$i+2],$cols[$i+$n+2],$cols[$i+(2*$n)+2]");
+					}
+				}
+			} 
 #case /POOLS/ {} 
 			case(/^TOP/) {
 				$n=@cols;
