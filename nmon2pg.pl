@@ -95,7 +95,7 @@ foreach $nmon_file (@ARGV) {
 				if ($cols[1] =~ /SerialNumber/) { $serial=$cols[2]; }
 				if ($cols[1] =~ /host/) 	{ $hostname=lc($cols[2]); }
 			}
-			case (/^DISK.+|^VG.+/) {
+			case (/^DISK.+|^VG.+|PAGING/) {
 				if ( $cols[1] =~ /^T[0-9]+/) {
 					# insert values
                                         $n=@{$label{$cols[0]}};
@@ -116,7 +116,7 @@ case (/FILE/) {}
 case (/IOADAPT/) {} 
 case (/JFSFILE/) {} 
 case (/JFSINODE/) {} 
-			case(/^LPAR|^CPU_ALL|^MEM|^MEMNEW|^MEMUSE/) {
+			case(/^LPAR|^CPU_ALL|^MEM|^MEMNEW|^MEMUSE|^PAGE/) {
 				$n=@cols;
 				if ( $cols[1] =~ /^T[0-9]+/) {
 					$values=join(",",@cols[2..$n-1]);
@@ -126,8 +126,6 @@ case (/JFSINODE/) {}
 				}
 			} 
 #case (/NET|NETERROR|NETPACKET|NETSIZE/) {} 
-#case /PAGE/| {} 
-#case /PAGING/ {} 
 #case /POOLS/ {} 
 			case(/^TOP/) {
 				$n=@cols;
