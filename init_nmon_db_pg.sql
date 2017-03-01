@@ -30,6 +30,10 @@ drop table TOP;
 drop table UARG;
 drop table PAGE;
 drop table PAGING;
+drop table NET;
+drop table NETPACKET;
+drop table NETSIZE;
+drop table NETERROR;
 
 
 create table CPU_ALL (
@@ -323,4 +327,37 @@ create table PAGING (
         label           char(32),
         value           real);
 
+create table NET (
+	Serial          char(16),
+        host            char(16),
+        time            timestamp,
+        label           char(32),
+	read		real,
+	write		real));
 
+create table NETPACKET (
+	Serial          char(16),
+        host            char(16),
+        time            timestamp,
+        label           char(32),
+        read            real,
+        write           real));
+
+create table NETSIZE (
+        Serial          char(16),
+        host            char(16),
+        time            timestamp,
+        label           char(32),
+        readsize        real,
+        writesize       real));
+
+
+create table NETERROR (
+	Serial          char(16),
+        host            char(16),
+        time            timestamp,
+        label           char(32),
+	ierrs		real,
+	oerrs		real,	
+	collisions	real))
+	
