@@ -1,78 +1,106 @@
 
-drop table CPU_ALL;
-drop table MEM;
-drop table MEMNEW;
-drop table MEMUSE;
-drop table LPAR;
-drop table DISKAVGRIO;
-drop table DISKAVGWIO;
-drop table DISKBSIZE;
-drop table DISKBUSY;
-drop table DISKREAD;
-drop table DISKREADSERV;
-drop table DISKRIO;
-drop table DISKRXFER;
-drop table DISKSERV;
-drop table DISKWAIT;
-drop table DISKWIO;
-drop table DISKWRITE;
-drop table DISKWRITESERV;
-drop table DISKXFER;
-drop table WLMCPU;
-drop table WLMMEM;
-drop table WLMBIO;
-drop table VGBUSY;
-drop table VGREAD;
-drop table VGSIZE;
-drop table VGWRITE;
-drop table VGXFER;
-drop table TOP;
-drop table UARG;
-drop table PAGE;
-drop table PAGING;
-drop table NET;
-drop table NETPACKET;
-drop table NETSIZE;
-drop table NETERROR;
 
 
-create table CPU_ALL (
+drop  table CPU_ALL CASCADE;
+drop  table PCPU CASCADE;
+drop  table SCPU CASCADE;
+drop  table MEM CASCADE;
+drop  table MEMNEW CASCADE;
+drop  table MEMUSE CASCADE;
+drop  table LPAR CASCADE;
+drop  table DISKAVGRIO CASCADE;
+drop  table DISKAVGWIO CASCADE;
+drop  table DISKBSIZE CASCADE;
+drop  table DISKBUSY CASCADE;
+drop  table DISKREAD CASCADE;
+drop  table DISKREADSERV CASCADE;
+drop  table DISKRIO CASCADE;
+drop  table DISKRXFER CASCADE;
+drop  table DISKSERV CASCADE;
+drop  table DISKWAIT CASCADE;
+drop  table DISKWIO CASCADE;
+drop  table DISKWRITE CASCADE;
+drop  table DISKWRITESERV CASCADE;
+drop  table DISKXFER CASCADE;
+drop  table WLMCPU CASCADE;
+drop  table WLMMEM CASCADE;
+drop  table WLMBIO CASCADE;
+drop  table VGBUSY CASCADE;
+drop  table VGREAD CASCADE;
+drop  table VGSIZE CASCADE;
+drop  table VGWRITE CASCADE;
+drop  table VGXFER CASCADE;
+drop  table TOP CASCADE;
+drop  table UARG CASCADE;
+drop  table PAGE CASCADE;
+drop  table PAGING CASCADE;
+drop  table NET CASCADE;
+drop  table NETPACKET CASCADE;
+drop  table NETSIZE CASCADE;
+drop  table NETERROR CASCADE;
+drop  table IOADAPT CASCADE;
+drop  table FILE CASCADE;
+drop  table PROC CASCADE;
+
+
+create UNLOGGED table CPU_ALL (
 	Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
 	user_pct	real,
 	sys_pct		real,
 	wait_pct	real,
 	idle_pct	real,
 	busy		real,
-	PhysicalCPUs	integer);
+	PhysicalCPUs	integer ) ;
 
-create table MEM (
+create UNLOGGED table PCPU (
+        Serial          char(16),
+        host            char(16),
+        time            timestamp with time zone,
+	id		integer,
+	puser        real,
+        psys         real,
+        pwait        real,
+        pidle        real) ;
+
+
+create UNLOGGED table SCPU (
+        Serial          char(16),
+        host            char(16),
+        time            timestamp with time zone,
+        id              integer,
+        suser        real,
+        ssys         real,
+        swait        real,
+        sidle        real) ;
+
+create UNLOGGED table MEM (
 	Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
 	realfree_pct	real,
 	virtualfree_pct	real,
 	realfree_MB	real,
 	virtualfree_MB	real,
 	realtotal_MB	real,
-	virtualtotal_MB	real);
+	virtualtotal_MB	real ) ;
 
-create table MEMNEW (
+create UNLOGGED table MEMNEW (
         Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
 	process_pct	real,
 	fscache_pct	real,
 	system_pct	real,
 	free_pct	real,
 	pinned_pct	real,
-	user_pct	real);
+	user_pct	real ) ;
 
-create table MEMUSE (
+create UNLOGGED table MEMUSE (
 	Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
 	numperm_pct		real,
 	minperm_pct		real,
 	maxperm_pct		real,
@@ -80,14 +108,14 @@ create table MEMUSE (
 	maxfree_pct		real,
 	numclient_pct	real,
 	maxclient_pct	real,
-	lruable_pages	real);
+	lruable_pages	real default 0.0) ;
 	
 
 
-create table LPAR (
+create UNLOGGED table LPAR (
 	Serial		char(16),
 	host		char(16),
-	time		timestamp,
+	time		timestamp with time zone,
 	PhysicalCPU	real,
 	virtualCPUs	integer,
 	logicalCPUs	integer,
@@ -108,179 +136,179 @@ create table LPAR (
 	VP_Wait_pct	real,
 	VP_Idle_pct	real,
 	Folded		integer,
-	Pool_id	integer);
+	Pool_id	integer ) ;
 
-create table DISKAVGRIO (
+create UNLOGGED table DISKAVGRIO (
 	Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
 	label		char(8),
-	value		real);
+	value		real ) ;
 
-create table DISKAVGWIO (
+create UNLOGGED table DISKAVGWIO (
 	Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
         label           char(8),
-	value           real);
+	value           real ) ;
 
 
-create table DISKBSIZE (
+create UNLOGGED table DISKBSIZE (
 	Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
         label           char(8),
-	value           real);
+	value           real ) ;
 	
-create table DISKBUSY (
+create UNLOGGED table DISKBUSY (
 	Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
         label           char(8),
-	value           real);
+	value           real ) ;
 
 
-create table DISKREAD (
+create UNLOGGED table DISKREAD (
 	Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
         label           char(8),
-	value           real);
+	value           real ) ;
 
-create table DISKREADSERV (
+create UNLOGGED table DISKREADSERV (
 	Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
         label           char(8),
-	value           real);
+	value           real ) ;
 
 
-create table DISKRIO (
+create UNLOGGED table DISKRIO (
 	Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
         label           char(8),
-	value           real);
+	value           real ) ;
 
 
-create table DISKRXFER (
+create UNLOGGED table DISKRXFER (
 	Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
         label           char(8),
-	value           real);
+	value           real ) ;
 
 
-create table DISKSERV (
+create UNLOGGED table DISKSERV (
 	Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
         label           char(8),
-	value           real);
+	value           real ) ;
 
 
-create table DISKWAIT (
+create UNLOGGED table DISKWAIT (
 	Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
         label           char(8),
-	value           real);
+	value           real ) ;
 
 
-create table DISKWIO (
+create UNLOGGED table DISKWIO (
 	Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
         label           char(8),
-	value           real);
+	value           real ) ;
 
 
-create table DISKWRITE (
+create UNLOGGED table DISKWRITE (
 	Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
         label           char(8),
-	value           real);
+	value           real ) ;
 
 
-create table DISKWRITESERV (
+create UNLOGGED table DISKWRITESERV (
 	Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
         label           char(8),
-	value           real);
+	value           real ) ;
 
 
-create table DISKXFER (
+create UNLOGGED table DISKXFER (
 	Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
         label           char(8),
-	value           real);
+	value           real ) ;
 
-create table WLMCPU (
+create UNLOGGED table WLMCPU (
         Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
         label           char(64),
-        value           real);
+        value           real ) ;
 
 
-create table WLMMEM (
+create UNLOGGED table WLMMEM (
         Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
         label           char(64),
-        value           real);
+        value           real ) ;
 
 
-create table WLMBIO (
+create UNLOGGED table WLMBIO (
         Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
         label           char(64),
-        value           real);
+        value           real ) ;
 
 
-create table VGBUSY (
+create UNLOGGED table VGBUSY (
 	Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
 	label		char(32),
-	value           real);
+	value           real ) ;
 
-create table VGREAD (
+create UNLOGGED table VGREAD (
         Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
         label              char(32),
-        value           real);
+        value           real ) ;
 
-create table VGSIZE (
+create UNLOGGED table VGSIZE (
         Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
         label              char(32),
-        value           real);
+        value           real ) ;
 
-create table VGWRITE (
+create UNLOGGED table VGWRITE (
         Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
         label              char(32),
-        value           real);
+        value           real ) ;
 
-create table VGXFER (
+create UNLOGGED table VGXFER (
         Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
         label              char(32),
-        value           real);
+        value           real ) ;
 
-create table TOP (
+create UNLOGGED table TOP (
 	Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
 	pid		integer,
 	cpu_pct		real,
 	usr_pct		real,
@@ -293,23 +321,24 @@ create table TOP (
 	ram_pct		real,
 	Paging		integer,
 	Command		char(256),
-	WLMclass	char(64));
+	WLMclass	char(64) ) ;
 
-create table UARG (
+create UNLOGGED table UARG (
 	Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
 	pid             integer,
 	PPID		integer,
 	COMM		char(64),
 	THCOUNT		integer,	
 	username	char(8),
-	GROUPname	char(8));
+	GROUPname	char(8), 
+	full_command 	varchar(256)) ;
 
-create table PAGE (
+create UNLOGGED table PAGE (
 	Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
 	faults		real,
 	pgin		real,
 	pgout		real,
@@ -317,47 +346,83 @@ create table PAGE (
 	pgsout		real,
 	reclaims 	real,
 	scans		real,
-	cycles		real);
+	cycles		real ) ;
 
 
-create table PAGING (
+create UNLOGGED table PAGING (
         Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
         label           char(32),
-        value           real);
+        value           real ) ;
 
-create table NET (
+create UNLOGGED table NET (
 	Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
         label           char(32),
-	read		real,
-	write		real);
+ 	value		real);
 
-create table NETPACKET (
+create UNLOGGED table NETPACKET (
 	Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
         label           char(32),
-        read            real,
-        write           real);
+        value           real );
 
-create table NETSIZE (
+create UNLOGGED table NETSIZE (
         Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
         label           char(32),
-        readsize        real,
-        writesize       real);
+        value        	real);
 
 
-create table NETERROR (
+create UNLOGGED table NETERROR (
 	Serial          char(16),
         host            char(16),
-        time            timestamp,
+        time            timestamp with time zone,
         label           char(32),
-	ierrs		real,
-	oerrs		real,	
-	collisions	real);
+	value 		real);
 	
+create UNLOGGED table IOADAPT (
+	Serial          char(16),
+        host            char(16),
+        time            timestamp with time zone,
+        label           char(32),
+	read	real,
+	write	real,
+	tps	real ) ;
+
+create UNLOGGED table FILE (
+	Serial          char(16),
+        host            char(16),
+        time            timestamp with time zone,
+	iget		real,
+	namei		real,
+	dirblk		real,
+	readch		real,
+	writech		real,	
+	ttyrawch	real,
+	ttycanch	real,
+	ttyoutch	real ) ;
+
+
+create UNLOGGED table PROC (
+	Serial          char(16),
+        host            char(16),
+        time            timestamp with time zone,
+	Runnable	real,
+	Swap_in		 real,
+	pswitch		real,
+	syscall		real,
+	read		real,
+	write		real,
+	fork		real,
+	exec		 real,
+	sem		real,
+	msg		real,
+	asleep_bufio	real,
+	asleep_rawio	real,
+	asleep_diocio	real ) ;
+
