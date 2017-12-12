@@ -41,6 +41,7 @@ drop  table NETERROR CASCADE;
 drop  table IOADAPT CASCADE;
 drop  table FILE CASCADE;
 drop  table PROC CASCADE;
+drop table SUMMARY CASCADE;
 
 
 create UNLOGGED table CPU_ALL (
@@ -425,4 +426,20 @@ create UNLOGGED table PROC (
 	asleep_bufio	real,
 	asleep_rawio	real,
 	asleep_diocio	real ) ;
+
+create UNLOGGED table SUMMARY (
+	Serial		char(16),
+	host		char(16),
+	time		timestamp with time zone,
+	Processes	integer,
+	pct_usr		real,
+	pct_sys		real,
+	ResTextKB	real,
+	ResDataKB	real,
+	CharIOKB	real,
+	paging		real,
+	Command		char(256));
+
+
+create table INFO_SERVEUR(serial char(16),type char(32),rate real);
 
