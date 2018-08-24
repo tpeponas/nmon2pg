@@ -56,6 +56,15 @@ GetOptions(
     "debug"             => \$debug,
     ) || die("There is invalid option.  Use --help or --man.\n");
 
+
+
+if ($help) {
+    print_help();
+    exit(0);
+
+}
+
+
 my $driver   = "Pg"; 
 my $dsn = "DBI:$driver:dbname=$dbname;host=$dbhost;port=5432";
 my $dbh = DBI->connect($dsn, $dbuserid, $dbpassword, { RaiseError => 0 })
@@ -63,10 +72,19 @@ my $dbh = DBI->connect($dsn, $dbuserid, $dbpassword, { RaiseError => 0 })
 
 my $aix_version;
 
-# On parse le fichier Ligne par Ligne
 
 sub print_help {
-
+    print "Nmon2pg.pl : Perl Script to import Nmon file to a postgres Database \n";
+    print "Options: \n";
+    print "--ssh_username : username to get remote nmon file\n";
+    print "--ssh_password : password for ssh_username to get remote nmon file\n";
+    print "--hosts_list : Hosts list on which to get nmon file\n";
+    print "--ssh_filename : patterne for nmon file to get on host_list \n";
+    print "--dbhost : Databse postgresql server (default localhost ) \n";
+    print "--dbuserid : Database postgresql username (default nmon) \n";
+    print "--dbpassword : Database postgresql password (default nmon) \n";
+    print "--dbname : Databse postgresql name (defautl nmon) \n";
+    print "--skip_regexp : Dot not import skip pattern of nmon file (exemple : DISK.*|NET.*)\n";
 }
 
 sub init_var {
@@ -176,7 +194,7 @@ foreach $nmon_file (@ARGV) {
                                         }
                                 } else  {
                                         $n=@cols;
-                                        # Inititalisation des nom des adapter
+                                        # Inititalisation des nom des adapters
                                         for($i=2;$i<$n;$i=$i+3) {
                                                 $cols[$i] =~ s/_read.*//;
 						$cols[$i] =~ s/\ /_/g;
