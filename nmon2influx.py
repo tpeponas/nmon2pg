@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# TPEP import AIX nmon file to postrges database
+# TPEP import AIX nmon file to influxdb
 
 import paramiko
 import io
