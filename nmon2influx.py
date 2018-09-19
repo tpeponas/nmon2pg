@@ -18,7 +18,7 @@ class NMON_Import:
     def __init__(self,skip,only,pg_dbhost="127.0.0.1",pg_dbname="nmon",pg_dbuser="nmon",pg_dbpass="nmon"):
         self.skip=skip
         self.only=only
-        self.lines_pattern=['^AAA','^BBBP','^DISK.+|^VG.+|^PAGING|^WLM|^NET|^NPIV|^SEA|^IOADAPT|^LAN','^LPAR|^CPU_ALL|^MEM|^MEMNEW|^MEMUSE|^PAGE|^FILE|^PROC|^SUMMARY|^PCPU_ALL|^SCPU_ALL','^TOP','^ZZZZ','^UARG','^PROCAIO','^.CPU[0-9]+']
+        self.lines_pattern=['^AAA','^BBBP','^DISK.+|^VG.+|^PAGING|^WLM|^NET|^NPIV|^SEA|^IOADAPT|^LAN','^LPAR|^CPU_ALL|^MEM|^MEMNEW|^MEMUSE|^PAGE|^FILE|^PROC|^SUMMARY|^PCPU_ALL|^SCPU_ALL','^TOP','^ZZZZ','^UARG','^PROCAIO','^.CPU[0-9]+|^CPU[0-9]+']
         self.lines_proc=[self.proc_info,self.proc_BBBP,self.proc_label_value,self.proc_metrics,self.proc_top,self.proc_zzzz,self.proc_uarg,self.proc_skip,self.proc_xcpuxx]
         self.host=""
         self.serial=""
@@ -77,14 +77,14 @@ class NMON_Import:
         r=line.replace(',,',',0,')
         line_tab=r.strip().split(',')
         fields=dict()
-        cpu_id=re.search('^.CPU([0-9]+),.*',line).group(1).strip()
-        cpu_type=re.search('(^.CPU)[0-9]+,.*',line).group(1).strip()
-
+        cpu_id=re.search('^[PS]*CPU([0-9]+),.*',line).group(1).strip()
+        cpu_type=re.search('(^[PS]*CPU)[0-9]+,.*',line).group(1).strip()
+        
         if cpu_type in self.copydata and (re.match("T[0-9]+",line_tab[1])):
             line_tab[1]=self.zzzz[line_tab[1]]
             epoch=int(time.mktime(time.strptime(line_tab[1],"%d-%b-%YT%H:%M:%SZ")))
             l=len(self.col_name[cpu_type])
-            for i in range(l-1):
+            for i in range(l):
                 fields[self.col_name[cpu_type][i]]=float(line_tab[i+2])
             self.json_body.append( {
                 "measurement":cpu_type,
