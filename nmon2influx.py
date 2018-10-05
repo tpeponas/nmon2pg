@@ -18,8 +18,8 @@ class NMON_Import:
     def __init__(self,skip,only,pg_dbhost="127.0.0.1",pg_dbname="nmon",pg_dbuser="nmon",pg_dbpass="nmon"):
         self.skip=skip
         self.only=only
-        self.lines_pattern=['^AAA','^BBBP','^DISK.+|^VG.+|^PAGING|^WLM|^NET|^NPIV|^SEA|^IOADAPT|^LAN','^LPAR|^CPU_ALL|^MEM|^MEMNEW|^MEMUSE|^PAGE|^FILE|^PROC|^SUMMARY|^PCPU_ALL|^SCPU_ALL','^TOP','^ZZZZ','^UARG','^PROCAIO','^.CPU[0-9]+|^CPU[0-9]+']
-        self.lines_proc=[self.proc_info,self.proc_BBBP,self.proc_label_value,self.proc_metrics,self.proc_top,self.proc_zzzz,self.proc_uarg,self.proc_skip,self.proc_xcpuxx]
+        self.lines_pattern=['^AAA','^BBBP','^VG.+|^PAGING|^WLM|^NET|^NPIV|^SEA|^IOADAPT|^LAN','^LPAR|^CPU_ALL|^MEM|^MEMNEW|^MEMUSE|^PAGE|^FILE|^PROC|^SUMMARY|^PCPU_ALL|^SCPU_ALL','^TOP','^ZZZZ','^UARG','^PROCAIO','^.CPU[0-9]+|^CPU[0-9]+','^DISK.+']
+        self.lines_proc=[self.proc_info,self.proc_BBBP,self.proc_label_value,self.proc_metrics,self.proc_top,self.proc_zzzz,self.proc_uarg,self.proc_skip,self.proc_xcpuxx,self.proc_hdisk]
         self.host=""
         self.serial=""
         self.debug=0
@@ -29,7 +29,7 @@ class NMON_Import:
         self.zzzz=dict()
         self.labels=dict()
         self.version=0
-        self.copydata["INFO_HDISK"]=io.StringIO()
+        self.hdiskinfo=dict()
 
         self.influx_client=InfluxDBClient("127.0.0.1","8086",database='nmon');
         
@@ -47,6 +47,10 @@ class NMON_Import:
         if (re.search('m hdisk',line)):
             hdisk=re.search('"m (hdisk[0-9]+) .*"',line).group(1).strip()
             hdisk_type=re.search('".*-L[0-9]+\s+(.*)"',line).group(1).strip()
+            self.hdiskinfo[hdisk]=hdisk_type
+            if (self.debug):
+                print ("hdisk: "+hdisk+" hdisk_type: "+self.hdiskinfo[hdisk])
+            
             
     def proc_label_value(self,line):
         r=line.replace(',,',',0,')
@@ -72,6 +76,35 @@ class NMON_Import:
             self.labels[line_tab[0]]=[];
             for i in iter(line_tab[2:]):
                 self.labels[line_tab[0]].append(i.strip())
+
+
+    def proc_hdisk(self,line):
+        r=line.replace(',,',',0,')
+        line_tab=r.strip().split(',')
+        if line_tab[0] in self.copydata:
+            line_tab[1]=self.zzzz[line_tab[1]]
+            epoch=int(time.mktime(time.strptime(line_tab[1],"%d-%b-%YT%H:%M:%SZ")))
+            for i in range(len(self.labels[line_tab[0]])):
+                self.json_body.append( {
+                    "measurement":line_tab[0],
+                    "tags": {
+                        "serial":self.serial,
+                        "host":self.host,
+                        "label":self.labels[line_tab[0]][i],
+                        "type":self.hdiskinfo[self.labels[line_tab[0]][i]]
+                    },
+                    "time":epoch,
+                    "fields" : {
+                        "value" : float(line_tab[i+2])
+                    }
+                })
+        else:
+            self.copydata[line_tab[0]]=True;
+            self.labels[line_tab[0]]=[];
+            for i in iter(line_tab[2:]):
+                self.labels[line_tab[0]].append(i.strip())
+
+                
 
     def proc_xcpuxx(self,line):
         r=line.replace(',,',',0,')
@@ -185,6 +218,8 @@ class NMON_Import:
         self.copydata=dict()
         self.zzzz=dict()
         self.labels=dict()
+        self.hdiskinfo=dict()
+        
         for line in iter(file):
             if (re.match("^ZZZZ|^AAA",line)):
                 if (self.debug):
@@ -240,21 +275,24 @@ if (args.f is None and args.ssh_host):
     for host in iter(host_list):
         ssh=paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        
         try:
             ssh.connect(host,username=args.ssh_username,password=args.ssh_password)
+            stdin, stdout, stderr = ssh.exec_command("ls "+args.ssh_file);
+            for f in iter(stdout):
+                print("import "+host+" file:"+f.strip());
+                ftp = ssh.open_sftp()
+                ftp.get(f.strip(),'/tmp/tmp_nmon2pg')
+                ftp.close()
+                remote_file=open('/tmp/tmp_nmon2pg',encoding='latin1')
+                NMON.parse_file(remote_file)
+                remote_file.close()
+            ssh.close()
         except:
             print ("Can not ssh connect to "+host);
-
-        stdin, stdout, stderr = ssh.exec_command("ls "+args.ssh_file);
-        for f in iter(stdout):
-            print("import "+host+" file:"+f.strip());
-            ftp = ssh.open_sftp()
-            ftp.get(f.strip(),'/tmp/tmp_nmon2pg')
-            ftp.close()
-            remote_file=open('/tmp/tmp_nmon2pg',encoding='latin1')
-            NMON.parse_file(remote_file)
-            remote_file.close()
-        ssh.close()
+            pass
+            
+            
             
 else:
     for nmon_file in args.f:
