@@ -9,13 +9,14 @@ import re
 import configparser
 import time
 import pprint
+import os
 
 
 from influxdb import InfluxDBClient
 
 class NMON_Import:
 
-    def __init__(self,skip,only,pg_dbhost="127.0.0.1",pg_dbname="nmon",pg_dbuser="nmon",pg_dbpass="nmon"):
+    def __init__(self,skip,only,influx_dbhost="127.0.0.1",influx_dbname="nmon",influx_dbport=8086):
         self.skip=skip
         self.only=only
         self.lines_pattern=['^AAA','^BBBP','^VG.+|^PAGING|^WLM|^NET|^NPIV|^SEA|^IOADAPT|^LAN','^LPAR|^CPU_ALL|^MEM|^MEMNEW|^MEMUSE|^PAGE|^FILE|^PROC|^SUMMARY|^PCPU_ALL|^SCPU_ALL','^TOP','^ZZZZ','^UARG','^PROCAIO','^.CPU[0-9]+|^CPU[0-9]+','^DISK.+']
@@ -31,7 +32,7 @@ class NMON_Import:
         self.version=0
         self.hdiskinfo=dict()
 
-        self.influx_client=InfluxDBClient("127.0.0.1","8086",database='nmon');
+        self.influx_client=InfluxDBClient(influx_dbhost,influx_dbport,database=influx_dbname);
         
 
     def proc_info(self,line):
@@ -221,7 +222,7 @@ class NMON_Import:
         self.hdiskinfo=dict()
         
         for line in iter(file):
-            if (re.match("^ZZZZ|^AAA",line)):
+            if (re.match("^ZZZZ|^AAAi|^BBB",line)):
                 if (self.debug):
                     print ("ZZZZ:",line)
                 self.parse_line(line)
@@ -245,30 +246,33 @@ class NMON_Import:
 
 
 config = configparser.ConfigParser()
-config.read('/home/tpeponas/.nmon2pg.ini')
+config.read(os.environ['HOME']+"/.nmon2influx.ini")
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--skip", help="Skip Regexp",default=config.get('MAIN','skip',fallback=None))
 parser.add_argument("--only", help="Only Tab Regexp",default=config.get('MAIN','only',fallback=None))
-parser.add_argument("--dbhost",help="Postgres Database Host",default=config.get('DB','host',fallback="127.0.0.1"))
-parser.add_argument("--dbname",help="Postgres Database Nmon",default=config.get('DB','name',fallback="nmon"))
+parser.add_argument("--influx_host",help="Influx Database Host",default=config.get('DB','host',fallback="127.0.0.1"))
+parser.add_argument("--influx_name",help="Influx Database Nmon",default=config.get('DB','name',fallback="nmon"))
+parser.add_argument("--influx_port",help="Influx Database Port Default 8086",default=config.get('DB','port',fallback="8086"))
 parser.add_argument("--dbuser",help="Postgres Database user",default=config.get('DB','username',fallback="nmon"))
 parser.add_argument("--dbpass",help="Postgres Database password",default=config.get('DB','password',fallback="nmon"))
 parser.add_argument("--ssh_host",help="ssh hostname for remote connection",default=config.get('SSH','hosts',fallback=None))
 parser.add_argument("--ssh_username",help="ssh username for remote connection",default=config.get('SSH','username',fallback=None))
 parser.add_argument("--ssh_password",help="ssh password for remote connection",default=config.get('SSH','password',fallback=None));
+parser.add_argument("--ssh_keyfile",help="ssh key file for remote connection",default=config.get('SSH','keyfile',fallback=None));
 parser.add_argument("--ssh_file",help="ssh remote file");
 parser.add_argument("-f",type=argparse.FileType('r'), nargs='+');
 args = parser.parse_args()
 
 
-dbhost=args.dbhost
+dbhost=args.influx_host
 dbuser=args.dbuser
 dbpass=args.dbpass
-dbname=args.dbname
+dbname=args.influx_name
+dbport=args.influx_port
 
 
-NMON=NMON_Import(skip=args.skip,only=args.only,pg_dbhost=dbhost,pg_dbname=dbname,pg_dbuser=dbuser,pg_dbpass=dbpass);
+NMON=NMON_Import(skip=args.skip,only=args.only,influx_dbhost=dbhost,influx_dbname=dbname,influx_dbport=dbport);
 
 if (args.f is None and args.ssh_host):
     host_list=args.ssh_host.split(',')
@@ -277,7 +281,11 @@ if (args.f is None and args.ssh_host):
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         
         try:
-            ssh.connect(host,username=args.ssh_username,password=args.ssh_password)
+            if (args.ssh_keyfile):
+                ssh.connect(host,username=args.ssh_username,key_filename=args.ssh_keyfile)
+            else:
+                ssh.connect(host,username=args.ssh_username,password=args.ssh_password)
+                
             stdin, stdout, stderr = ssh.exec_command("ls "+args.ssh_file);
             for f in iter(stdout):
                 print("import "+host+" file:"+f.strip());
