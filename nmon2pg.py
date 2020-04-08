@@ -12,7 +12,7 @@ import configparser
 
 class NMON_Import:
 
-    def __init__(self,skip,pg_dbhost="127.0.0.1",pg_dbname="nmon",pg_dbuser="nmon",pg_dbpass="nmon"):
+    def __init__(self,skip,pg_dbhost="10.193.128.234",pg_dbname="nmon",pg_dbuser="nmon",pg_dbpass="nmon"):
         self.skip=skip
         self.lines_pattern=['^AAA','^DISK.+|^VG.+|^PAGING|^WLM|^NET','^LPAR|^CPU_ALL|^MEM|^MEMNEW|^MEMUSE|^PAGE|^FILE|^PROC|^SUMMARY','^TOP','^ZZZZ','^UARG','^PROCAIO']
         self.lines_proc=[self.proc_info,self.proc_label_value,self.proc_metrics,self.proc_top,self.proc_zzzz,self.proc_uarg,self.proc_skip]
@@ -124,7 +124,7 @@ class NMON_Import:
 
 
 config = configparser.ConfigParser()
-config.read('/home/tpeponas/.nmon2pg.ini')
+config.read(os.environ['HOME']+'/.nmon2pg.ini')
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--skip", help="Skip Regexp",default=config.get('MAIN','skip',fallback=None))
@@ -156,7 +156,7 @@ if (args.f is None and args.ssh_host):
         try:
             ssh.connect(host,username=args.ssh_username,password=args.ssh_password)
         except:
-            print ("Can not ssh connect to "+hsot);
+            print ("Can not ssh connect to "+host);
 
         stdin, stdout, stderr = ssh.exec_command("ls "+args.ssh_file);
         for f in iter(stdout):
