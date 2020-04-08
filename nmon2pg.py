@@ -8,6 +8,7 @@ import argparse
 import re
 import psycopg2
 import configparser
+import os
 
 
 class NMON_Import:
