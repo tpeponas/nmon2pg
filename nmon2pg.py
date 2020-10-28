@@ -13,7 +13,7 @@ import os
 
 class NMON_Import:
 
-    def __init__(self,skip,pg_dbhost="10.193.128.234",pg_dbname="nmon",pg_dbuser="nmon",pg_dbpass="nmon"):
+    def __init__(self,skip,pg_dbhost="127.0.0.1",pg_dbname="nmon",pg_dbuser="nmon",pg_dbpass="nmon"):
         self.skip=skip
         self.lines_pattern=['^AAA','^DISK.+|^VG.+|^PAGING|^WLM|^NET','^LPAR|^CPU_ALL|^MEM|^MEMNEW|^MEMUSE|^PAGE|^FILE|^PROC|^SUMMARY','^TOP','^ZZZZ','^UARG','^PROCAIO']
         self.lines_proc=[self.proc_info,self.proc_label_value,self.proc_metrics,self.proc_top,self.proc_zzzz,self.proc_uarg,self.proc_skip]
